@@ -129,23 +129,28 @@ class admin:
 
 
 print("welcome to my library.Whenever you want to exit, enter command 'exit'.")
+admin = False
 while True:
     first_in = input("If you are a member input 'm' and if you are a admin input 'a':")
     if first_in == "m":
-        fname = input("Please enter first name: ")
-        lname = input("Please enter last name: ")
-        age = input("Please enter age: ")
-        username = input("Please enter username: ")
-        password = input("Please enter password: ")
-        new_user = user(fname, lname, age, username, password)
+        sec_in = input("If you have already registered, please enter l in the order, otherwise enter r to register.")
+        if sec_in == "r":
+            fname = input("Please enter first name: ")
+            lname = input("Please enter last name: ")
+            age = input("Please enter age: ")
+            username = input("Please enter username: ")
+            password = input("Please enter password: ")
+            new_user = user(fname, lname, age, username, password)
+            break
+        if sec_in == "l":
+            username = input("Please enter username: ")
+            password = input("Please enter password: ")
+            
+
 
 
     elif first_in == "a":
-        fname = input("Please enter first name: ")
-        lname = input("Please enter last name: ")
-        username = input("Please enter username: ")
-        password = input("Please enter password: ")
-        new_admin = admin(fname, lname, username, password)
+
 
     elif first_in == "exit":
         sys.exit(0);
