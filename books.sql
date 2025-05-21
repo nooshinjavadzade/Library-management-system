@@ -2,6 +2,7 @@ show databases ;
 use library;
 drop table books , loan , members;
 show tables ;
+drop table loan;
 create table members(
     memberID int primary key auto_increment,
     firstname varchar(30) not null ,
@@ -25,7 +26,7 @@ create table loan(
     foreign key (user) references members(memberID),
     foreign key (book) references books(bookID),
     land_date date not null ,
-    return_date date not null
+    return_date date
 );
 
 

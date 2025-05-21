@@ -107,6 +107,32 @@ def show_books():
         print(f"Database error: {e}")
         return False
 
+def show_members():
+    query = "SELECT * FROM members"
+    try:
+        cursor.execute(query)
+        result = cursor.fetchall()
+        if result:
+            print(tabulate(result, headers=["ID" , "first name" , "last name" , "email" , "join date"], tablefmt="fancy_grid"))
+        else:
+            print("No members found.")
+    except Error as e:
+        print(f"Database error: {e}")
+        return False
+
+def show_loans():
+    query = "SELECT * FROM loans"
+    try:
+        cursor.execute(query)
+        result = cursor.fetchall()
+        if result:
+            print(tabulate(result, headers=["loan ID" , "book ID" , "memberID" , "date borrowed" , "date return"] , tablefmt="fancy_grid"))
+        else:
+            print("No loans found.")
+    except Error as e:
+        print(f"Database error: {e}")
+        return False
+
 def delete_book(ID):
     query = "DELETE FROM books WHERE bookID = %s"
     try:
@@ -119,6 +145,31 @@ def delete_book(ID):
     except Error as e:
         print(f"The error '{e}' occurred")
 
+def delete_member(ID):
+    query = "DELETE FROM members WHERE memberID = %s"
+    try:
+        cursor.execute(query, (ID,))
+        if cursor.rowcount == 0:
+            print("No member found with the given ID.")
+        else:
+            connectionn.commit()
+            print("Member deleted successfully.")
+    except Error as e:
+        print(f"The error '{e}' occurred")
+
+def delete_loan(ID):
+    query = "DELETE FROM loans WHERE loanID = %s"
+    try:
+        cursor.execute(query, (ID,))
+        if cursor.rowcount == 0:
+            print("No loan found with the given ID.")
+        else:
+            connectionn.commit()
+            print("Loan deleted successfully.")
+    except Error as e:
+        print(f"The error '{e}' occurred")
+
+#start from here
 print("Welcome to my library. Whenever you want to exit, enter command 'exit'.")
 admin = False
 while True:
@@ -186,5 +237,36 @@ while admin:
             continue
         else:
             print("Invalid input.")
+
+    if ad_in == 'm':
+        show_members()
+        ad_in3 = input("To delete a member, enter the command -d <member id> .\n"
+              " Enter command 'back' to return to the admin menu: ")
+        if ad_in3 == "back":
+            continue
+        elif ad_in3.startswith("-d"):
+            member_id = ad_in3.split("-d")[1].strip()
+            member_id = int(member_id)
+            delete_member(member_id)
+            continue
+        else:
+            print("Invalid input.")
+
+    if ad_in == 'l':
+        show_loans()
+        in_4 = input("To delete a loan, enter the command -d <loan id> .\n "
+                     "Enter command 'back' to return to the admin menu: ")
+        if in_4 == "back":
+            continue
+        elif in_4.startswith("-d"):
+            loan_id = in_4.split("-d")[1].strip()
+            loan_id = int(loan_id)
+            delete_loan(loan_id)
+            continue
+        else:
+            print("Invalid input.")
+
+
+
 
 
