@@ -256,14 +256,3 @@ Admin Access: Admin can only log in through the login menu and cannot register a
 Data Integrity: The system ensures that books cannot be borrowed if they are already loaned out.
 
 Error Handling: Proper error messages are displayed for invalid inputs or database errors.
-
-
-
-Contact
-
-If you encounter any issues or have suggestions for improvement, feel free to open an issue in the repository or contact [your email/contact info].
-
-
-This README provides comprehensive documentation for setting up, using, and understanding the Library Management System.
-
-
