@@ -169,9 +169,38 @@ def delete_loan(ID):
     except Error as e:
         print(f"The error '{e}' occurred")
 
+def get_member_id( username):
+    cursor = connectionn.cursor()
+    query = "SELECT memberID FROM members WHERE username = %s"
+    cursor.execute(query, (username,))
+    result = cursor.fetchone()
+    if result:
+        return result[0]
+    else:
+        print("User not found.")
+        return None
+
+
+def land_book(bookID, userID):
+    cursor = connectionn.cursor()
+    query = "SELECT return_date FROM loan WHERE book = %s ORDER BY land_date DESC LIMIT 1"
+    cursor.execute(query, (bookID,))
+    result = cursor.fetchone()
+    if result is None or result[0] is not None:
+        try:
+            land_date = datetime.date.today()
+            query = "INSERT INTO loan (book, user, land_date) VALUES (%s, %s, %s)"
+            cursor.execute(query, (bookID, userID, land_date))
+            connectionn.commit()
+            print("Book borrowed successfully!")
+        except Exception as e:
+            print(f"An error occurred: {e}")
+    else:
+        print("The book is currently not available for borrowing.")
 #start from here
 print("Welcome to my library. Whenever you want to exit, enter command 'exit'.")
 admin = False
+user_name = " "
 while True:
     first_in = input("If you have already registered, please enter 'l', otherwise enter 'r' to register: ")
     if first_in == 'l':
@@ -182,6 +211,7 @@ while True:
             break
         else:
             if check_user_password(username, password):
+                user_name = username
                 print("You have successfully logged in.")
                 break
             else:
@@ -196,6 +226,7 @@ while True:
             print("Password must have at least 4 characters.")
             continue
         new_user = member(first_name, last_name, username, password, email)
+        user_name = username
         new_user.add_user()
         break
     elif first_in == 'exit':
@@ -265,6 +296,24 @@ while admin:
             continue
         else:
             print("Invalid input.")
+
+
+while not admin:
+    print("Welcom to my library.")
+    show_books()
+    user_in = input("To exit, enter the command '0'. To borrow a book, enter its ID: ")
+    try:
+        num = int(user_in)
+        if num == 0:
+            closing()
+            sys.exit(0)
+        else:
+            land_book(num , get_member_id(user_name))
+    except ValueError:
+        print("Invalid input.")
+
+
+
 
 
 
