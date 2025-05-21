@@ -2,7 +2,7 @@ import mysql.connector
 from mysql.connector import Error
 from datetime import datetime
 import sys
-import hashlib
+from tabulate import tabulate
 
 def connection(host_name, user_name, user_password, db_name):
     connection = None
@@ -35,7 +35,7 @@ class member:
         self.firstname = firstname
         self.lastname = lastname
         self.username = username
-        self.password = hashlib.sha256(password.encode()).hexdigest()
+        self.password = password
         self.email = email
         self.join_date = datetime.now().strftime('%Y-%m-%d')
 
@@ -62,6 +62,23 @@ class member:
         else:
             print("Username already exists.")
 
+class book:
+    def __init__(self, name, author, genre):
+        self.name = name
+        self.author = author
+        self.genre = genre
+
+    def add_book(self):
+        query = "INSERT INTO books (name, author, genre) VALUES (%s, %s, %s)"
+        values = (self.name, self.author, self.genre)
+        try:
+            cursor = connection.cursor()
+            cursor.execute(query, values)
+            connection.commit()
+            print("Book added successfully.")
+        except Exception as e:
+            print(f"An error occurred: {e}")
+
 def check_user_password(username, password):
     query = "SELECT password FROM members WHERE username = %s"
     try:
@@ -73,10 +90,34 @@ def check_user_password(username, password):
 
     if result is not None:
         stored_password = result[0]
-        hashed_password = hashlib.sha256(password.encode()).hexdigest()
-        return stored_password == hashed_password
+        return stored_password == password
     else:
         return False
+
+def show_books():
+    query = "SELECT * FROM books"
+    try:
+        cursor.execute(query)
+        result = cursor.fetchall()
+        if result:
+            print(tabulate(result, headers=["ID", "Name", "Author", "Genre"], tablefmt="fancy_grid"))
+        else:
+            print("No books found.")
+    except Error as e:
+        print(f"Database error: {e}")
+        return False
+
+def delete_book(ID):
+    query = "DELETE FROM books WHERE bookID = %s"
+    try:
+        cursor.execute(query, (ID,))
+        if cursor.rowcount == 0:
+            print("No book found with the given ID.")
+        else:
+            connectionn.commit()
+            print("Book deleted successfully.")
+    except Error as e:
+        print(f"The error '{e}' occurred")
 
 print("Welcome to my library. Whenever you want to exit, enter command 'exit'.")
 admin = False
@@ -111,3 +152,39 @@ while True:
         sys.exit(0)
     else:
         print("Invalid input.")
+
+
+while admin:
+    print("Dear admin, welcome!")
+    ad_in = input("Enter command 'b' to go to the list of books.\n "
+                  "Enter command 'm' to go to the list of library members.\n"
+                  " Enter command 'l' to see the list of loans:")
+    if ad_in == "exit":
+        closing()
+        sys.exit(0)
+
+    if ad_in == 'b':
+        print("List of books:")
+        show_books()
+        print("To delete a book, enter the command -d <book id> .\n"
+              "To add a book, enter the command -add."
+              "\n Enter command 'back' to return to the admin menu:")
+        ad_in2 = input("Enter your choice: ")
+        if ad_in2 == "back":
+            continue
+        elif ad_in2 == '-add':
+            name = input("Enter your book name: ")
+            author = input("Enter your book author: ")
+            genre = input("Enter your book genre: ")
+            new_book = book(name, author, genre)
+            new_book.add_book()
+            continue
+        elif ad_in2.startswith("-d"):
+            book_id = ad_in2.split("-d")[1].strip()
+            book_id = int(book_id)
+            delete_book(book_id)
+            continue
+        else:
+            print("Invalid input.")
+
+
