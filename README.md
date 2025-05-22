@@ -51,7 +51,7 @@ Borrow Books: A user can borrow a book only if it is not currently loaned out.
 
 View Available Books: Users can see the list of books in the library.
 
-
+Only the user can borrow books.
 
 
 
@@ -256,3 +256,5 @@ Admin Access: Admin can only log in through the login menu and cannot register a
 Data Integrity: The system ensures that books cannot be borrowed if they are already loaned out.
 
 Error Handling: Proper error messages are displayed for invalid inputs or database errors.
+
+
