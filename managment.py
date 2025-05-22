@@ -234,6 +234,17 @@ def show_user_loans(userID):
         print(f"An error occurred: {e}")
 
 
+def check_username(username):
+        query = "SELECT COUNT(*) FROM members WHERE username = %s"
+        cursor.execute(query, (username,))
+        result = cursor.fetchone()
+
+        if result[0] > 0:
+            return True
+        else:
+            return False
+
+
 #start from here
 print("Welcome to my library. Whenever you want to exit, enter command 'exit'.")
 admin = False
@@ -259,10 +270,14 @@ while True:
         email = input("Please enter your email: ")
         username = input("Please enter your username: ")
         password = input("Please enter your password (must have at least 4 characters): ")
+        if check_username (username):
+            print("Your username has been registered.")
+            continue
         if len(password) < 4:
             print("Password must have at least 4 characters.")
             continue
         new_user = member(first_name, last_name, username, password, email)
+
         user_name = username
         new_user.add_user()
         break
