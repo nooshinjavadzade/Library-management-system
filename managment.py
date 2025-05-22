@@ -69,12 +69,12 @@ class book:
         self.genre = genre
 
     def add_book(self):
-        query = "INSERT INTO books (name, author, genre) VALUES (%s, %s, %s)"
+        query = "INSERT INTO books (book_name, author, gener) VALUES (%s, %s, %s)"
         values = (self.name, self.author, self.genre)
         try:
-            cursor = connection.cursor()
+            cursor = connectionn.cursor()
             cursor.execute(query, values)
-            connection.commit()
+            connectionn.commit()
             print("Book added successfully.")
         except Exception as e:
             print(f"An error occurred: {e}")
@@ -113,7 +113,7 @@ def show_members():
         cursor.execute(query)
         result = cursor.fetchall()
         if result:
-            print(tabulate(result, headers=["ID" , "first name" , "last name" , "email" , "join date"], tablefmt="fancy_grid"))
+            print(tabulate(result, headers=["ID" , "first name" , "last name" , "email" ,"username" , "password", "join date"], tablefmt="fancy_grid"))
         else:
             print("No members found.")
     except Error as e:
@@ -121,7 +121,7 @@ def show_members():
         return False
 
 def show_loans():
-    query = "SELECT * FROM loans"
+    query = "SELECT * FROM loan"
     try:
         cursor.execute(query)
         result = cursor.fetchall()
@@ -158,7 +158,7 @@ def delete_member(ID):
         print(f"The error '{e}' occurred")
 
 def delete_loan(ID):
-    query = "DELETE FROM loans WHERE loanID = %s"
+    query = "DELETE FROM loan WHERE loanID = %s"
     try:
         cursor.execute(query, (ID,))
         if cursor.rowcount == 0:
@@ -188,7 +188,7 @@ def land_book(bookID, userID):
     result = cursor.fetchone()
     if result is None or result[0] is not None:
         try:
-            land_date = datetime.date.today()
+            land_date = datetime.now().strftime('%Y-%m-%d')
             query = "INSERT INTO loan (book, user, land_date) VALUES (%s, %s, %s)"
             cursor.execute(query, (bookID, userID, land_date))
             connectionn.commit()
@@ -197,6 +197,43 @@ def land_book(bookID, userID):
             print(f"An error occurred: {e}")
     else:
         print("The book is currently not available for borrowing.")
+
+
+def return_book(loanID):
+    try:
+        return_date = datetime.now().strftime('%Y-%m-%d')
+        query = "UPDATE loan SET return_date = %s WHERE loanID = %s"
+        cursor.execute(query, (return_date, loanID))
+        if cursor.rowcount == 0:
+            print("No loan found with the given ID.")
+        else:
+            connectionn.commit()
+            print(f"Book with loan ID {loanID} has been successfully returned.")
+    except Error as e:
+        print(f"An error occurred: {e}")
+
+
+def show_user_loans(userID):
+    try:
+        query = """
+            SELECT loan.loanID, books.bookID, books.book_name, books.author 
+            FROM loan 
+            INNER JOIN books ON loan.book = books.bookID
+            WHERE loan.user = %s AND loan.return_date IS NULL
+        """
+        cursor.execute(query, (userID,))
+        results = cursor.fetchall()
+        if not results:
+            print("You have no pending loans.")
+            return
+        headers = ["Loan ID", "Book ID", "Book Name", "Author"]
+        print("Your current borrowed books are:")
+        print(tabulate(results, headers=headers, tablefmt="grid"))
+        print("To return a book, use the corresponding Loan ID.")
+    except Error as e:
+        print(f"An error occurred: {e}")
+
+
 #start from here
 print("Welcome to my library. Whenever you want to exit, enter command 'exit'.")
 admin = False
@@ -285,7 +322,7 @@ while admin:
 
     if ad_in == 'l':
         show_loans()
-        in_4 = input("To delete a loan, enter the command -d <loan id> .\n "
+        in_4 = input("To delete a loan, enter the command -d <loan id> .\n"
                      "Enter command 'back' to return to the admin menu: ")
         if in_4 == "back":
             continue
@@ -301,16 +338,20 @@ while admin:
 while not admin:
     print("Welcom to my library.")
     show_books()
-    user_in = input("To exit, enter the command '0'. To borrow a book, enter its ID: ")
-    try:
-        num = int(user_in)
-        if num == 0:
-            closing()
-            sys.exit(0)
-        else:
-            land_book(num , get_member_id(user_name))
-    except ValueError:
-        print("Invalid input.")
+    user_in = input("To exit, enter the command 'exit'.\n "
+                    "To return a book, enter the command 'return'.\n "
+                    " To borrow a book, enter the command 'borrow': ")
+    if user_in.lower() == "exit":
+        closing()
+        sys.exit(0)
+    elif user_in.lower() == "borrow":
+        x = input("Enter your book id: ")
+        land_book(x,get_member_id(user_name))
+    elif user_in.lower() == "return":
+        show_user_loans(get_member_id(user_name))
+        y = input("Enter your loan id: ")
+        return_book(y)
+
 
 
 
